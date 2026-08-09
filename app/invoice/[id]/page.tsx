@@ -46,12 +46,12 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#6B1422] rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-[#B8860B] rounded-full flex items-center justify-center">
             <ShoppingBag className="w-6 h-6 text-white" />
           </div>
-          <p className="text-[#6B1422] font-bold tracking-widest uppercase text-sm">Generating Digital Bill...</p>
+          <p className="text-[#B8860B] font-bold tracking-widest uppercase text-sm">Generating Digital Bill...</p>
         </div>
       </div>
     );
@@ -59,9 +59,9 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center gap-4">
-        <p className="text-[#6B1422] font-bold text-xl">Invoice Not Found</p>
-        <Link href="/" className="px-6 py-2 bg-[#e5e5e5] hover:bg-[#DBCABF] rounded-lg text-[#000000] font-bold transition-colors">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <p className="text-[#B8860B] font-bold text-xl">Invoice Not Found</p>
+        <Link href="/" className="px-6 py-2 bg-[#FAFAFA] border border-[#D4AF37]/30 hover:bg-white rounded-lg text-[#000000] font-bold transition-colors">
           Return to Dashboard
         </Link>
       </div>
@@ -73,7 +73,7 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#000000] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
+    <div className="min-h-screen bg-[#FAFAFA] text-[#000000] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
       <style>{`
         @media print {
           @page {
@@ -93,7 +93,7 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
         <div className="flex items-center gap-3">
           <button 
             onClick={handleCopyLink}
-            className="flex items-center gap-2 bg-white hover:bg-[#F0EBE1]/40 text-[#4C3D32] hover:text-[#6B1422] font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-lg shadow-sm border border-[#e5e5e5] transition-colors cursor-pointer"
+            className="flex items-center gap-2 bg-white hover:bg-[#FAFAFA] text-[#4C3D32] hover:text-[#B8860B] font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-lg shadow-sm border border-[#D4AF37]/30 transition-colors cursor-pointer"
           >
             {copied ? (
               <>
@@ -107,7 +107,7 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
           </button>
           <button 
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-[#6B1422] hover:bg-[#520D18] text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-lg shadow-sm transition-colors cursor-pointer"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] hover:brightness-105 text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-lg shadow-md transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" /> Download PDF / Print
           </button>
@@ -115,26 +115,28 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* The Invoice Document */}
-      <div className="w-full max-w-3xl bg-white border border-[#e5e5e5] rounded-2xl shadow-xl print:shadow-none print:border-none print:rounded-none overflow-hidden">
+      <div className="w-full max-w-3xl bg-white border border-[#D4AF37]/30 rounded-2xl shadow-xl print:shadow-none print:border-none print:rounded-none overflow-hidden">
         
         {/* Header Section */}
-        <div className="bg-[#ffffff] border-b border-[#e5e5e5] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 flex items-center justify-center mb-4">
-            <img src="/icon.png" alt="Zera Logo" className="max-w-full max-h-full object-contain" />
+        <div className="bg-[#ffffff] border-b border-[#e5e5e5] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center relative">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]" />
+          <div className="w-24 h-24 flex items-center justify-center mb-3">
+            <img src="/logo.png" alt="Sweety Beauty Studio & Spa Logo" className="max-w-full max-h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-black text-[#6B1422] tracking-tight ">Zera</h1>
-          <p className="text-xs text-[#6B1422] font-bold tracking-wider mt-1 mb-4">INVOICE: {order.id}</p>
+          <h1 className="text-3xl font-black text-[#B8860B] tracking-tight">Sweety Beauty Studio & Spa</h1>
+          <p className="text-xs text-[#A67C1E] font-bold tracking-wider mt-1 mb-1">Proprietor: Sunitha Mercy</p>
+          <p className="text-xs text-[#B8860B] font-bold tracking-wider mb-4">INVOICE: {order.id}</p>
           
-          <div className="flex flex-col items-center gap-2 text-sm text-[#520D18] font-semibold">
+          <div className="flex flex-col items-center gap-2 text-sm text-[#333333] font-semibold">
             <div className="text-center max-w-md leading-relaxed">
-              <span className="inline-block text-[#6B1422] mr-1.5 align-middle -mt-0.5">
+              <span className="inline-block text-[#B8860B] mr-1.5 align-middle -mt-0.5">
                 <MapPin className="w-3.5 h-3.5" />
               </span>
-              <span>Kurinji Nagar, Brindhavan Circle, Kuniyamuthur, Coimbatore</span>
+              <span>156 Neethi Nagar, Peroorkada Junction, Trivandrum, Kerala</span>
             </div>
             <div className="flex items-center gap-1.5 justify-center">
-              <Phone className="w-3.5 h-3.5 text-[#6B1422] shrink-0" />
-              <span>+91 9342489391</span>
+              <Phone className="w-3.5 h-3.5 text-[#B8860B] shrink-0" />
+              <span>+91 93601 78097 / +91 9360803056</span>
             </div>
           </div>
         </div>
@@ -143,9 +145,9 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 p-8 sm:p-12 print:p-6 border-b border-[#e5e5e5]/50">
           <div>
             <h3 className="text-[10px] font-bold text-[#666666] uppercase tracking-[0.2em] mb-3">Billed To</h3>
-            <p className="text-base font-bold text-[#6B1422]">{order.customers?.name || "Guest Customer"}</p>
+            <p className="text-base font-bold text-[#B8860B]">{order.customers?.name || "Guest Customer"}</p>
             {order.customers?.phone && (
-              <p className="text-sm text-[#520D18] font-semibold mt-1">+91 {order.customers.phone.split("_")[0]}</p>
+              <p className="text-sm text-[#555555] font-semibold mt-1">+91 {order.customers.phone.split("_")[0]}</p>
             )}
           </div>
           <div className="sm:text-right flex flex-col sm:items-end">
@@ -172,7 +174,7 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
           <div className="w-full overflow-x-auto scrollbar-thin pb-2">
             <table className="w-full text-left border-collapse min-w-[400px]">
               <thead>
-                <tr className="border-b-2 border-[#e5e5e5]">
+                <tr className="border-b-2 border-[#D4AF37]/30">
                   <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider">Item Description</th>
                   <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider text-center">Qty</th>
                   <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider text-right">Price</th>
@@ -183,11 +185,11 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
                 {order.order_items.map((item: any, index: number) => (
                   <tr key={index} className="group">
                     <td className="py-6 pr-4 print:py-3">
-                      <p className="text-sm font-bold text-[#6B1422]">{item.snapshot_name}</p>
+                      <p className="text-sm font-bold text-[#B8860B]">{item.snapshot_name}</p>
                     </td>
                     <td className="py-6 px-4 print:py-3 text-center text-sm font-bold text-[#000000]">{item.quantity}</td>
                     <td className="py-6 pl-4 print:py-3 text-right text-sm font-bold text-[#000000]">₹{item.snapshot_price.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td className="py-6 pl-4 print:py-3 text-right text-sm font-black text-[#6B1422]">₹{(item.snapshot_price * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td className="py-6 pl-4 print:py-3 text-right text-sm font-black text-[#B8860B]">₹{(item.snapshot_price * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                   </tr>
                 ))}
               </tbody>
@@ -223,17 +225,17 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
-              <div className="border-t border-[#e5e5e5] pt-4 mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
-                <span className="text-sm font-black text-[#6B1422] uppercase tracking-widest shrink-0">Total Amount</span>
-                <span className="text-3xl font-black text-[#6B1422] self-end sm:self-auto leading-none mt-1 sm:mt-0">
+              <div className="border-t border-[#D4AF37]/30 pt-4 mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                <span className="text-sm font-black text-[#B8860B] uppercase tracking-widest shrink-0">Total Amount</span>
+                <span className="text-3xl font-black text-[#B8860B] self-end sm:self-auto leading-none mt-1 sm:mt-0">
                   ₹{order.grand_total.toLocaleString(undefined, {minimumFractionDigits: 2})}
                 </span>
               </div>
             </div>
         </div>
         {/* Footer */}
-        <div className="border-t border-[#e5e5e5]/60 p-6 print:p-4 text-center bg-[#f5f5f5] flex flex-col items-center justify-center gap-1.5">
-          <p className="text-xs font-bold text-[#6B1422] tracking-wider uppercase">Thank you for shopping!</p>
+        <div className="border-t border-[#e5e5e5]/60 p-6 print:p-4 text-center bg-[#fafafa] flex flex-col items-center justify-center gap-1.5">
+          <p className="text-xs font-bold text-[#B8860B] tracking-wider uppercase">Thank you for shopping!</p>
           <p className="text-[9px] font-bold text-[#666666]/80 uppercase tracking-[0.15em]">Powered by Cenexa Systems @2026</p>
         </div>
 
