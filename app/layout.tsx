@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zera - Premium POS",
-  description: "Zera POS Billing Panel and Digital Invoices",
+  title: "Sweety Beauty Studio & Spa - POS",
+  description: "Sweety Beauty Studio & Spa POS Billing Panel and Digital Invoices",
 };
 
 export default function RootLayout({
