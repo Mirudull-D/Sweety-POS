@@ -288,6 +288,9 @@ export default function POSBilling() {
   const [isOnline, setIsOnline] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customOrderDate, setCustomOrderDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [items, setItems] = useState<OrderItem[]>([
     { id: "1", name: "", desc: "", price: 0, qty: 1 },
   ]);
@@ -301,6 +304,7 @@ export default function POSBilling() {
   const [applyGST, setApplyGST] = useState<boolean>(false);
   const [gstPercentage, setGstPercentage] = useState<number>(18);
   const [activeInvoiceId, setActiveInvoiceId] = useState<string | null>(null);
+  const [completedBillData, setCompletedBillData] = useState<CompletedOrder | null>(null);
 
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -419,31 +423,41 @@ export default function POSBilling() {
 
       if (ordersData) {
         setOrders(
-          ordersData.map((o: any) => ({
-            id: o.id,
-            customerName: o.customers?.name || "Guest",
-            customerPhone: (o.customers?.phone || "").split("_")[0],
-            source: o.source,
-            items: o.order_items.map((i: any) => ({
-              id: i.id,
-              name: i.snapshot_name,
-              desc:
-                i.snapshot_name === "Custom Item" || !i.product_id
-                  ? "Custom"
-                  : "",
-              price: i.snapshot_price,
-              qty: i.quantity,
-            })),
-            subtotal: o.subtotal,
-            discount: o.discount_amount,
-            discountType: o.discount_type,
-            discountValue: o.discount_value,
-            deliveryFee: o.delivery_fee,
-            grandTotal: o.grand_total,
-            cashReceived: o.cash_received,
-            date: o.created_at,
-            status: o.status === "COMPLETED" ? "Completed" : "Pending",
-          })),
+          ordersData.map((o: any) => {
+            const rawPhone = o.customers?.phone || "";
+            let customDate = o.created_at;
+            if (rawPhone.includes("_DATE:")) {
+              const parts = rawPhone.split("_DATE:");
+              customDate = parts[1] || o.created_at;
+            }
+            const phoneOnly = (rawPhone.split("_DATE:")[0] || "").split("_")[0];
+
+            return {
+              id: o.id,
+              customerName: o.customers?.name || "Guest",
+              customerPhone: phoneOnly,
+              source: o.source,
+              items: o.order_items.map((i: any) => ({
+                id: i.id,
+                name: i.snapshot_name,
+                desc:
+                  i.snapshot_name === "Custom Item" || !i.product_id
+                    ? "Custom"
+                    : "",
+                price: i.snapshot_price,
+                qty: i.quantity,
+              })),
+              subtotal: o.subtotal,
+              discount: o.discount_amount,
+              discountType: o.discount_type,
+              discountValue: o.discount_value,
+              deliveryFee: o.delivery_fee,
+              grandTotal: o.grand_total,
+              cashReceived: o.cash_received,
+              date: customDate,
+              status: o.status === "COMPLETED" ? "Completed" : "Pending",
+            };
+          }),
         );
       }
     } catch (err) {
@@ -773,8 +787,17 @@ export default function POSBilling() {
       newOrderId = `INV-${currentYear}-${randStr}`;
     }
 
-    // Format unique phone: phone_name_timestamp to bypass unique constraint
-    const dbPhone = `${customerPhone}_${customerName || "Guest"}_${Date.now()}`;
+    const currentTimeStr = new Date().toTimeString().split(" ")[0];
+    let orderTimestamp = new Date().toISOString();
+    if (customOrderDate) {
+      const parsedDate = new Date(`${customOrderDate}T${currentTimeStr}`);
+      if (!isNaN(parsedDate.getTime())) {
+        orderTimestamp = parsedDate.toISOString();
+      }
+    }
+
+    // Format unique phone with custom order date metadata: phone_name_timestamp_DATE:orderTimestamp
+    const dbPhone = `${customerPhone}_${customerName || "Guest"}_${Date.now()}_DATE:${orderTimestamp}`;
     const { data: custData, error: custErr } = await supabase
       .from("customers")
       .upsert(
@@ -815,6 +838,7 @@ export default function POSBilling() {
         delivery_fee: deliveryFee,
         grand_total: localGrandTotal,
         cash_received: cashReceived,
+        created_at: new Date().toISOString(),
       });
 
       await supabase.from("order_items").insert(dbItems);
@@ -847,16 +871,6 @@ export default function POSBilling() {
     
     message += `\n${moneyEmoji} *Total Amount: ₹${localGrandTotal.toFixed(2)}*\n\n`;
     message += `${receiptEmoji} View and download your detailed digital receipt here:\n${invoiceUrl}`;
-
-    const encodedMessage = encodeURIComponent(message);
-    let whatsappUrl = `https://api.whatsapp.com/send/?phone=91${customerPhone}&text=${encodedMessage}`;
-
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = whatsappUrl;
-    } else {
-      window.open(whatsappUrl, "_blank");
-    }
 
     const localItems = [
       ...itemsToSave.map((i) => ({
@@ -893,7 +907,7 @@ export default function POSBilling() {
       deliveryFee,
       grandTotal,
       cashReceived,
-      date: new Date().toISOString(),
+      date: orderTimestamp,
       status: "Completed",
     };
 
@@ -902,12 +916,16 @@ export default function POSBilling() {
     // Reset Form
     setCustomerName("");
     setCustomerPhone("");
+    setCustomOrderDate(new Date().toISOString().split("T")[0]);
     setItems([{ id: "1", name: "", desc: "", price: 0, qty: 1 }]);
     setDiscountValue(0);
     setDeliveryFee(0);
     setCashReceived(0);
     setApplyGST(false);
     setGstPercentage(18);
+
+    // Trigger Bill Generated Success View
+    setCompletedBillData(newOrder);
   };
 
   const resendWhatsApp = (order: CompletedOrder) => {
@@ -921,27 +939,32 @@ export default function POSBilling() {
     const checkEmoji = String.fromCodePoint(0x2705);
     const moneyEmoji = String.fromCodePoint(0x1F4B0);
     const receiptEmoji = String.fromCodePoint(0x1F4E6);
-    let message = `${shopEmoji} *Korean Fried Chicken* ${shopEmoji}\n\n`;
+    let message = `${shopEmoji} *Sweety Beauty Studio & Spa* ${shopEmoji}\n\n`;
     message += `${checkEmoji} Here are your invoice details!\n\n`;
     
-    message += `*Subtotal:* ₹${order.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
+    message += `Subtotal: ₹${order.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
     if (order.discount > 0) {
-      message += `*Discount Applied:* -₹${order.discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
+      message += `Discount Applied: -₹${order.discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
     }
     
-    // Bulletproof mathematical GST calculation
+    // GST calculation
     const gstItem = order.items.find(i => i.name && i.name.startsWith("GST"));
     const calculatedGst = order.grandTotal - (order.subtotal - order.discount + order.deliveryFee);
     
     if (calculatedGst > 0.1) {
       const gstLabel = gstItem ? gstItem.name : "GST";
-      message += `*${gstLabel}:* ₹${calculatedGst.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
+      message += `${gstLabel}: ₹${calculatedGst.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
+    }
+
+    if (order.deliveryFee > 0) {
+      message += `Delivery Fee: ₹${order.deliveryFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
     }
     
-    message += `\n${moneyEmoji} *Total Amount:* ₹${order.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n\n`;
+    message += `\n${moneyEmoji} *Total Amount: ₹${order.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}*\n\n`;
     message += `${receiptEmoji} View and download your detailed digital receipt here:\n${invoiceUrl}`;
     const encodedMessage = encodeURIComponent(message);
-    let whatsappUrl = `https://api.whatsapp.com/send/?phone=91${order.customerPhone.split('_')[0]}&text=${encodedMessage}`;
+    const cleanPhone = order.customerPhone.replace(/\D/g, '').slice(-10);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodedMessage}`;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       window.location.href = whatsappUrl;
@@ -1604,7 +1627,10 @@ export default function POSBilling() {
             {/* Navigation Links */}
             <nav className="px-4 py-6 space-y-2">
               <button
-                onClick={() => setActiveTab("billing")}
+                onClick={() => {
+                  setActiveTab("billing");
+                  setCompletedBillData(null);
+                }}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "billing"
                     ? "bg-white text-[#8B6914] shadow-md"
@@ -1617,7 +1643,10 @@ export default function POSBilling() {
               {role === 'admin' && (
                 <>
                   <button
-                    onClick={() => setActiveTab("orders")}
+                    onClick={() => {
+                      setActiveTab("orders");
+                      setCompletedBillData(null);
+                    }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                       activeTab === "orders"
                         ? "bg-white text-[#8B6914] shadow-md"
@@ -1628,7 +1657,10 @@ export default function POSBilling() {
                     Order History
                   </button>
                   <button
-                    onClick={() => setActiveTab("analytics")}
+                    onClick={() => {
+                      setActiveTab("analytics");
+                      setCompletedBillData(null);
+                    }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                       activeTab === "analytics"
                         ? "bg-white text-[#8B6914] shadow-md"
@@ -1712,21 +1744,121 @@ export default function POSBilling() {
         </header>
 
         {activeTab === "billing" && (
-          <div className="flex-1 flex flex-col gap-6 max-w-[1400px] min-w-0 mx-auto w-full">
-            {/* Subheader Accent Bar and Title */}
-            <div className="flex justify-between items-center py-2 border-b border-black/10 w-full">
-              <div className="flex items-center gap-4">
-                <span className="w-1.5 h-8 bg-[#B8860B] rounded-full"></span>
+          completedBillData ? (
+            <div className="flex-1 flex flex-col gap-4 max-w-[640px] min-w-0 mx-auto w-full py-2 animate-in fade-in duration-200">
+              {/* Header Bar */}
+              <div className="flex justify-between items-center pb-2 border-b border-black/10">
                 <div>
-                  <h2 className="text-xl font-black text-[#000000] tracking-tight">
-                    POS Billing Panel
-                  </h2>
-                  <p className="text-[11px] text-[#000000] font-semibold mt-0.5">
-                    Quick Invoice generator & database synced checkout
+                  <h1 className="text-xl sm:text-2xl font-black text-[#000000] tracking-tight">
+                    Bill Generated
+                  </h1>
+                  <p className="text-[11px] font-mono font-bold text-[#B8860B] mt-0.5">
+                    #{completedBillData.id}
                   </p>
+                </div>
+                <button
+                  onClick={() => setCompletedBillData(null)}
+                  className="bg-black hover:bg-black/80 text-white px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New Sale
+                </button>
+              </div>
+
+              {/* Payment Receipt Card */}
+              <div className="bg-white rounded-xl p-4 sm:p-5 border border-black/10 shadow-xs space-y-3">
+                <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                  Payment Receipt
+                </div>
+
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-gray-600">Grand Total</span>
+                  <span className="text-xl font-black text-black">
+                    ₹{completedBillData.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-gray-600">Amount Received</span>
+                  <span className="text-sm font-black text-black">
+                    ₹{(completedBillData.cashReceived || completedBillData.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                {/* Balance Returned Box */}
+                <div className="bg-[#EFF6FF] border border-[#DBEAFE] rounded-lg p-3 sm:p-3.5 flex justify-between items-center mt-1">
+                  <span className="text-xs font-bold text-[#2563EB]">
+                    Balance Returned
+                  </span>
+                  <span className="text-base sm:text-lg font-black text-[#2563EB]">
+                    ₹{Math.max(0, (completedBillData.cashReceived || 0) - completedBillData.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons Bar */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button
+                  onClick={() => setActiveInvoiceId(completedBillData.id)}
+                  className="bg-white border border-gray-300 hover:bg-gray-50 text-black py-2.5 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5 text-[#B8860B]" />
+                  Print Receipt
+                </button>
+                <button
+                  onClick={() => resendWhatsApp(completedBillData)}
+                  className="bg-[#10B981] hover:bg-[#059669] text-white py-2.5 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.012c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+                  </svg>
+                  WhatsApp Invoice
+                </button>
+                <button
+                  onClick={() => setCompletedBillData(null)}
+                  className="bg-black hover:bg-black/80 text-white py-2.5 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New Sale
+                </button>
+              </div>
+
+              {/* Items Sold Card */}
+              <div className="bg-white rounded-xl p-4 sm:p-5 border border-black/10 shadow-xs space-y-3">
+                <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                  Items Sold
+                </div>
+
+                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  {completedBillData.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-xs py-1 border-b border-gray-50 last:border-none">
+                      <span className="font-semibold text-black">
+                        {item.name} <span className="text-gray-400 font-bold text-[10px] ml-1">× {item.qty} {item.qty === 1 ? 'piece' : 'pieces'}</span>
+                      </span>
+                      <span className="font-bold text-black">
+                        ₹{(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="flex-1 flex flex-col gap-6 max-w-[1400px] min-w-0 mx-auto w-full">
+              {/* Subheader Accent Bar and Title */}
+              <div className="flex justify-between items-center py-2 border-b border-black/10 w-full">
+                <div className="flex items-center gap-4">
+                  <span className="w-1.5 h-8 bg-[#B8860B] rounded-full"></span>
+                  <div>
+                    <h2 className="text-xl font-black text-[#000000] tracking-tight">
+                      POS Billing Panel
+                    </h2>
+                    <p className="text-[11px] text-[#000000] font-semibold mt-0.5">
+                      Quick Invoice generator & database synced checkout
+                    </p>
+                  </div>
+                </div>
+              </div>
 
             {/* Grid Layout */}
             <div className="flex flex-col lg:flex-row gap-8 w-full">
@@ -1739,7 +1871,7 @@ export default function POSBilling() {
                     Customer Details
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
                     <div>
                       <label className="block text-[10px] font-bold text-[#000000] uppercase tracking-[0.15em] mb-2">
                         Customer Name
@@ -1767,6 +1899,22 @@ export default function POSBilling() {
                             e.target.value.replace(/\D/g, "").slice(0, 10),
                           )
                         }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#000000] uppercase tracking-[0.15em] mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#B8860B]" />
+                          Bill Date
+                        </span>
+                        <span className="text-[9px] text-[#B8860B] font-extrabold uppercase">Custom / Past</span>
+                      </label>
+                      <input
+                        type="date"
+                        max={new Date().toISOString().split("T")[0]}
+                        className="w-full bg-[#FFFFFF]/40 border border-black/10 hover:border-black/10 focus:border-[#B8860B] focus:bg-white rounded-lg px-4 py-2.5 text-[#000000] text-sm font-bold focus:outline-none transition-colors cursor-pointer shadow-sm"
+                        value={customOrderDate}
+                        onChange={(e) => setCustomOrderDate(e.target.value)}
                       />
                     </div>
                   </div>
@@ -2308,7 +2456,8 @@ export default function POSBilling() {
               </div>
             </div>
           </div>
-        )}
+        )
+      )}
 
         {role === "admin" && activeTab === "orders" && (
           <div className="flex-1 flex flex-col max-w-[1400px] mx-auto w-full pb-8 pr-2 animate-in fade-in duration-300">
@@ -2494,6 +2643,9 @@ export default function POSBilling() {
                               Order ID
                             </th>
                             <th className="p-4 text-[10px] font-bold text-[#000000] uppercase tracking-widest">
+                              Date & Time
+                            </th>
+                            <th className="p-4 text-[10px] font-bold text-[#000000] uppercase tracking-widest">
                               Customer Name
                             </th>
                             <th className="p-4 text-[10px] font-bold text-[#000000] uppercase tracking-widest">
@@ -2518,6 +2670,19 @@ export default function POSBilling() {
                             >
                               <td className="p-4 text-xs font-semibold text-[#000000]">
                                 {order.id}
+                              </td>
+                              <td className="p-4 text-xs font-bold text-[#000000] whitespace-nowrap">
+                                {new Date(order.date).toLocaleDateString('en-IN', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                                <span className="block text-[10px] font-semibold text-black/60">
+                                  {new Date(order.date).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
                               </td>
                               <td className="p-4 text-xs font-bold text-[#000000]">
                                 {order.customerName}
@@ -3788,7 +3953,7 @@ export default function POSBilling() {
 
         {/* Invoice Modal */}
         {activeInvoiceId && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[400] flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
             <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] sm:h-[85vh] flex flex-col overflow-hidden transform scale-100 animate-in zoom-in-95 duration-200">
               <div className="px-4 py-3 flex justify-between items-center bg-white border-b border-black/10 shrink-0">
                 <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2 text-[#000000]">
