@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Download, Check, Smartphone } from "lucide-react";
 
 export default function PWAHandler() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -63,26 +65,27 @@ export default function PWAHandler() {
     setDeferredPrompt(null);
   };
 
-  if (isInstalled || !isInstallable) return null;
+  // Hide on invoice pages or if already installed/not installable
+  if (isInstalled || !isInstallable || pathname?.startsWith("/invoice")) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-[#000000] text-white p-3.5 sm:p-4 rounded-2xl shadow-2xl border-2 border-[#B8860B] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 max-w-[360px]">
-      <div className="w-10 h-10 rounded-xl bg-[#B8860B]/20 border border-[#B8860B] flex items-center justify-center shrink-0">
-        <Smartphone className="w-5 h-5 text-[#B8860B]" />
+    <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:bottom-4 z-50 bg-[#000000] text-white p-2.5 sm:p-4 rounded-2xl shadow-2xl border-2 border-[#4EC3D7] flex items-center gap-2.5 sm:gap-3 animate-in slide-in-from-bottom-5 duration-300 w-auto sm:max-w-[360px] print:hidden">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#4EC3D7]/20 border border-[#4EC3D7] flex items-center justify-center shrink-0">
+        <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-[#4EC3D7]" />
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="text-xs font-black tracking-tight text-white uppercase">
-          Install Sweety POS
+        <h4 className="text-[11px] sm:text-xs font-black tracking-tight text-white uppercase truncate">
+          Install Sweety Beauty Studio
         </h4>
-        <p className="text-[10px] text-gray-300 font-semibold truncate">
-          Add app to home screen for fast offline access
+        <p className="text-[9px] sm:text-[10px] text-gray-300 font-semibold truncate">
+          Add app for fast offline access
         </p>
       </div>
       <button
         onClick={handleInstallClick}
-        className="bg-[#B8860B] hover:bg-[#966d09] text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1 shrink-0"
+        className="bg-[#4EC3D7] hover:bg-[#39A0B3] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1 shrink-0"
       >
-        <Download className="w-3.5 h-3.5" />
+        <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
         Install
       </button>
     </div>

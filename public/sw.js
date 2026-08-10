@@ -4,7 +4,7 @@ const ASSETS_TO_CACHE = [
   '/manifest.json',
   '/logo.png',
   '/icon.png',
-  '/pos/admin/secure/control-panel/zera'
+  '/pos/admin/secure/control-panel/sweety-beauty-studio'
 ];
 
 self.addEventListener('install', (event) => {
