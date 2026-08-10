@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#B8860B",
+  themeColor: "#4EC3D7",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -22,13 +22,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Sweety Beauty Studio & Spa - POS",
-  description: "Sweety Beauty Studio & Spa POS Billing Panel and Digital Invoices",
+  title: "Sweety Beauty Studio - POS",
+  description: "Sweety Beauty Studio POS Billing Panel and Digital Invoices",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Sweety POS",
+    title: "Sweety Beauty Studio",
   },
   icons: {
     icon: "/logo.png",
@@ -50,7 +50,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sweety POS" />
+        <meta name="apple-mobile-web-app-title" content="Sweety Beauty Studio" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
       <body className="min-h-full flex flex-col">

@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+:root {
+  --primary: #4EC3D7;
+  --secondary: #4EC3D7;
+}
+
 body {
   font-family: 'Poppins', sans-serif !important;
   background-color: #FFFFFF;
@@ -15,17 +20,17 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D4AF37;
+  background: #4EC3D7;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8860B;
+  background: #39A0B3;
 }
 
 @layer utilities {
   /* Minimal input removes default focus rings and uses bottom border */
   .minimal-input {
-    @apply w-full bg-transparent border-b border-black/10 py-2 text-[#000000] focus:outline-none focus:border-[#B8860B] transition-colors placeholder:text-[#000000];
+    @apply w-full bg-transparent border-b border-black/10 py-2 text-[#000000] focus:outline-none focus:border-[#4EC3D7] transition-colors placeholder:text-[#000000];
   }
 }
 
@@ -89,6 +94,8 @@ input[type="number"] {
 }
 
 @theme {
+  --color-primary: #4EC3D7;
+  --color-secondary: #4EC3D7;
   --animate-float: float 3s ease-in-out infinite;
   --animate-swing: swing 2.5s ease-in-out infinite;
   --animate-pop: pop 2s ease-in-out infinite;
@@ -107,4 +114,5 @@ input[type="number"] {
     50% { transform: scale(1.1); }
   }
 }
+
 
