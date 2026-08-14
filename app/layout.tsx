@@ -22,13 +22,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Sweety Beauty Studio - POS",
-  description: "Sweety Beauty Studio POS Billing Panel and Digital Invoices",
+  title: "Sweety Beauty Studio and Spa - POS",
+  description: "Sweety Beauty Studio and Spa POS Billing Panel and Digital Invoices",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Sweety Beauty Studio",
+    title: "Sweety Beauty Studio and Spa",
   },
   icons: {
     icon: "/logo.png",
@@ -50,7 +50,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sweety Beauty Studio" />
+        <meta name="apple-mobile-web-app-title" content="Sweety Beauty Studio and Spa" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
       <body className="min-h-full flex flex-col">

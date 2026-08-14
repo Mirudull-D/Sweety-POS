@@ -1,7 +1,7 @@
 {
-  "name": "Sweety Beauty Studio - POS",
-  "short_name": "Sweety Beauty Studio",
-  "description": "Sweety Beauty Studio Point of Sale Billing & Management System",
+  "name": "Sweety Beauty Studio and Spa - POS",
+  "short_name": "Sweety Beauty Studio and Spa",
+  "description": "Sweety Beauty Studio and Spa Point of Sale Billing & Management System",
   "start_url": "/pos/admin/secure/control-panel/sweety-beauty-studio",
   "display": "standalone",
   "background_color": "#FFFFFF",
