@@ -1564,7 +1564,7 @@ export default function POSBilling() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., Bone Shot"
+                  placeholder="e.g., Haircut"
                   className="minimal-input font-bold text-sm"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
@@ -1577,7 +1577,7 @@ export default function POSBilling() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., Premium Silk"
+                  placeholder="e.g., Facial & Skin Care"
                   className="minimal-input text-sm"
                   value={newCatDesc}
                   onChange={(e) => setNewCatDesc(e.target.value)}
@@ -2008,7 +2008,7 @@ export default function POSBilling() {
                           <div className="col-span-7 relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
                             <input
                               type="text"
-                              placeholder="Type custom product description..."
+                              placeholder="Type custom service description..."
                               className="flex-1 bg-white border border-black/10 focus:border-[#4EC3D7] rounded-lg px-4 py-2 text-xs font-semibold text-[#000000] focus:outline-none transition-colors placeholder:text-[#000000] min-w-0"
                               value={item.name}
                               onChange={(e) =>
@@ -2881,7 +2881,7 @@ export default function POSBilling() {
                       : tab === "revenue"
                         ? "Revenue"
                         : tab === "products"
-                          ? "Products"
+                          ? "Services"
                           : "Coupons";
                   return (
                     <button
@@ -3319,7 +3319,7 @@ export default function POSBilling() {
                   <div className="bg-white border border-black/10 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
                     <div className="flex justify-between items-start mb-3">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#000000]">
-                        Top Product
+                        Top Service
                       </span>
                       <div className="w-6 h-6 rounded-full bg-[#EC4899]/10 flex items-center justify-center">
                         <Trophy className="w-3 h-3 text-[#EC4899] animate-pop" />
@@ -3574,7 +3574,7 @@ export default function POSBilling() {
               <div className="bg-white border border-black/10 rounded-xl p-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                   <h3 className="font-bold text-[#000000] text-sm">
-                    Product Sales Leaderboard
+                    Service Sales Leaderboard
                   </h3>
 
                   {/* Product Search Input */}
@@ -3582,7 +3582,7 @@ export default function POSBilling() {
                     <Search className="w-3.5 h-3.5 text-[#000000]" />
                     <input
                       type="text"
-                      placeholder="Search product..."
+                      placeholder="Search service..."
                       className="text-xs font-semibold bg-transparent border-none outline-none focus:ring-0 text-[#000000] placeholder:text-[#000000]/50 w-full sm:w-[180px]"
                       value={productSearchQuery}
                       onChange={(e) => setProductSearchQuery(e.target.value)}
@@ -3592,7 +3592,7 @@ export default function POSBilling() {
 
                 {Object.keys(itemSales).length === 0 ? (
                   <div className="text-center text-[#000000] text-sm font-semibold py-12">
-                    No products sold in this period.
+                    No services sold in this period.
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -3603,7 +3603,7 @@ export default function POSBilling() {
                             Rank
                           </th>
                           <th className="p-3 text-[10px] font-bold text-[#000000] uppercase tracking-wider">
-                            Product Name
+                            Service Name
                           </th>
                           <th className="p-3 text-[10px] font-bold text-[#000000] uppercase tracking-wider text-right">
                             Qty Sold
@@ -3627,7 +3627,7 @@ export default function POSBilling() {
                               colSpan={5}
                               className="text-center py-12 text-sm font-semibold text-[#000000]"
                             >
-                              No matching products found.
+                              No matching services found.
                             </td>
                           </tr>
                         ) : (

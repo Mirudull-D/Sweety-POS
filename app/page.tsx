@@ -82,7 +82,7 @@ export default function Home() {
               <div>
                 <p className="text-[10px] font-bold text-black/50 uppercase tracking-wider mb-0.5">Business Hours</p>
                 <p className="text-[#1A1A1A]">
-                  Open Daily: 9:00 AM - 8:00 PM
+                  Open Daily: 9:00 AM - 6:00 PM
                 </p>
               </div>
             </div>
