@@ -853,7 +853,7 @@ export default function POSBilling() {
     const moneyEmoji = String.fromCodePoint(0x1F4B0);
     const receiptEmoji = String.fromCodePoint(0x1F4E6);
 
-    let message = `${shopEmoji} *Sweety Beauty Studio* ${shopEmoji}\n\n`;
+    let message = `${shopEmoji} *Sweety Beauty Studio and Spa* ${shopEmoji}\n\n`;
     message += `${checkEmoji} Here are your invoice details!\n\n`;
     message += `Subtotal: ₹${localSubtotal.toFixed(2)}\n`;
     
@@ -939,7 +939,7 @@ export default function POSBilling() {
     const checkEmoji = String.fromCodePoint(0x2705);
     const moneyEmoji = String.fromCodePoint(0x1F4B0);
     const receiptEmoji = String.fromCodePoint(0x1F4E6);
-    let message = `${shopEmoji} *Sweety Beauty Studio* ${shopEmoji}\n\n`;
+    let message = `${shopEmoji} *Sweety Beauty Studio and Spa* ${shopEmoji}\n\n`;
     message += `${checkEmoji} Here are your invoice details!\n\n`;
     
     message += `Subtotal: ₹${order.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`;
@@ -970,6 +970,37 @@ export default function POSBilling() {
       window.location.href = whatsappUrl;
     } else {
       window.open(whatsappUrl, "_blank");
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (window.confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+      try {
+        const { error } = await supabase
+          .from("orders")
+          .delete()
+          .eq("id", orderId);
+
+        if (error) {
+          console.error("Error deleting order:", error);
+          alert("Failed to delete order.");
+          return;
+        }
+
+        // Update local state
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(null);
+        }
+        if (completedBillData?.id === orderId) {
+          setCompletedBillData(null);
+        }
+        if (activeInvoiceId === orderId) {
+          setActiveInvoiceId(null);
+        }
+      } catch (err) {
+        console.error("Error deleting order:", err);
+      }
     }
   };
 
@@ -1276,13 +1307,13 @@ export default function POSBilling() {
           <div className="relative group mb-6">
             <div className="absolute -inset-1.5 bg-gradient-to-r from-[#4EC3D7] to-[#4EC3D7] rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative w-20 h-20 bg-white rounded-2xl p-3.5 border border-[#4EC3D7]/30 shadow-lg flex items-center justify-center">
-              <img src="/logo.png" alt="Sweety Beauty Studio Logo" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+              <img src="/logo.png" alt="Sweety Beauty Studio and Spa Logo" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
             </div>
           </div>
 
           {/* Title */}
           <h1 className="text-3xl font-serif text-[#4EC3D7] tracking-tight leading-tight mb-2">
-            Sweety Beauty Studio
+            Sweety Beauty Studio and Spa
           </h1>
           <p className="text-[#1C1917]/50 text-xs font-bold uppercase tracking-[0.2em] mb-8">
             Beauty POS Terminal • Peroorkada, Trivandrum
@@ -1345,7 +1376,7 @@ export default function POSBilling() {
         
         {/* Footnote */}
         <div className="mt-6 text-[#1C1917]/30 text-[9px] font-bold tracking-widest uppercase">
-          Sweety Beauty Studio Terminal v1.0
+          Sweety Beauty Studio and Spa Terminal v1.0
         </div>
       </div>
     );
@@ -1600,13 +1631,13 @@ export default function POSBilling() {
                 <div className="w-12 h-12 bg-[#FFFFFF] rounded-xl flex items-center justify-center shadow-md overflow-hidden shrink-0">
                   <img
                     src="/logo.png"
-                    alt="Sweety Beauty Studio Logo"
+                    alt="Sweety Beauty Studio and Spa Logo"
                     className="w-full h-full object-contain p-1"
                   />
                 </div>
                 <div>
                   <span className="font-black text-sm tracking-tight text-[#FFFFFF] block leading-tight">
-                    Sweety Beauty Studio
+                    Sweety Beauty Studio and Spa
                   </span>
                   <span className="text-[9px] text-white/80 font-bold tracking-wider block mt-0.5">
                     Peroorkada, Trivandrum
@@ -1640,37 +1671,35 @@ export default function POSBilling() {
                 <Receipt className="w-5 h-5 shrink-0" />
                 Billing Panel
               </button>
+              <button
+                onClick={() => {
+                  setActiveTab("orders");
+                  setCompletedBillData(null);
+                }}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                  activeTab === "orders"
+                    ? "bg-white text-[#0F4C5C] shadow-md"
+                    : "text-white/90 hover:bg-white/20 hover:text-white"
+                }`}
+              >
+                <History className="w-5 h-5 shrink-0" />
+                Order History
+              </button>
               {role === 'admin' && (
-                <>
-                  <button
-                    onClick={() => {
-                      setActiveTab("orders");
-                      setCompletedBillData(null);
-                    }}
-                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-                      activeTab === "orders"
-                        ? "bg-white text-[#0F4C5C] shadow-md"
-                        : "text-white/90 hover:bg-white/20 hover:text-white"
-                    }`}
-                  >
-                    <History className="w-5 h-5 shrink-0" />
-                    Order History
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab("analytics");
-                      setCompletedBillData(null);
-                    }}
-                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-                      activeTab === "analytics"
-                        ? "bg-white text-[#0F4C5C] shadow-md"
-                        : "text-white/90 hover:bg-white/20 hover:text-white"
-                    }`}
-                  >
-                    <BarChart2 className="w-5 h-5 shrink-0" />
-                    Analytics Dashboard
-                  </button>
-                </>
+                <button
+                  onClick={() => {
+                    setActiveTab("analytics");
+                    setCompletedBillData(null);
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                    activeTab === "analytics"
+                      ? "bg-white text-[#0F4C5C] shadow-md"
+                      : "text-white/90 hover:bg-white/20 hover:text-white"
+                  }`}
+                >
+                  <BarChart2 className="w-5 h-5 shrink-0" />
+                  Analytics Dashboard
+                </button>
               )}
 
               <div className="pt-4 border-t border-white/20 mt-4">
@@ -1717,7 +1746,7 @@ export default function POSBilling() {
             )}
             <div>
               <h1 className="text-lg font-black text-[#000000] tracking-tight">
-                Sweety Beauty Studio
+                Sweety Beauty Studio and Spa
               </h1>
             </div>
           </div>
@@ -2459,7 +2488,7 @@ export default function POSBilling() {
         )
       )}
 
-        {role === "admin" && activeTab === "orders" && (
+        {activeTab === "orders" && (
           <div className="flex-1 flex flex-col max-w-[1400px] mx-auto w-full pb-8 pr-2 animate-in fade-in duration-300">
             {/* Header Panel */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
@@ -2729,6 +2758,14 @@ export default function POSBilling() {
                                   >
                                     Details
                                   </button>
+                                  {role === 'admin' && (
+                                    <button
+                                      onClick={() => handleDeleteOrder(order.id)}
+                                      className="text-[10px] font-bold text-[#E11D48] hover:text-white hover:bg-[#E11D48] border border-[#E11D48] px-2 py-1.5 rounded uppercase tracking-wider transition-colors ml-2"
+                                    >
+                                      Delete
+                                    </button>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -3981,7 +4018,7 @@ export default function POSBilling() {
         {/* Classy Footer */}
         <footer className="mt-auto pt-10 pb-2 border-t border-black/10 flex flex-col md:flex-row justify-between items-center text-[10px] text-[#000000] font-semibold uppercase tracking-wider gap-4">
           <div className="text-[#000000]">
-            © 2026 All Rights Reserved. Sweety Beauty Studio.
+            © 2026 All Rights Reserved. Sweety Beauty Studio and Spa.
           </div>
           <div>
             Powered By{" "}

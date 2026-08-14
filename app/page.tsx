@@ -7,11 +7,11 @@ export default function Home() {
       <header className="border-b border-black/10 py-6 px-6 sm:px-12 flex justify-center items-center bg-white/90 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xs p-1 border border-[#4EC3D7]/30">
-            <img src="/logo.png" alt="Sweety Beauty Studio Logo" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="Sweety Beauty Studio and Spa Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <span className="text-sm font-black text-[#4EC3D7] tracking-wider uppercase block">
-              Sweety Beauty Studio
+              Sweety Beauty Studio and Spa
             </span>
             <span className="text-[9px] text-[#39A0B3] font-bold tracking-widest block uppercase -mt-0.5">
               Peroorkada, Trivandrum
@@ -30,7 +30,7 @@ export default function Home() {
           </span>
           
           <h1 className="text-3xl font-black text-[#4EC3D7] leading-tight tracking-tight mb-2">
-            Sweety Beauty Studio
+            Sweety Beauty Studio and Spa
           </h1>
           <p className="text-xs text-[#39A0B3] font-black tracking-widest uppercase mb-8">
             Beauty Studio Services
@@ -93,7 +93,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-black/10 py-6 text-center bg-white">
         <p className="text-[10px] font-bold text-[#4EC3D7] tracking-widest uppercase">
-          Sweety Beauty Studio • Peroorkada, Trivandrum
+          Sweety Beauty Studio and Spa • Peroorkada, Trivandrum
         </p>
         <p className="text-[9px] font-semibold text-black/40 uppercase tracking-wider mt-1">
           © {new Date().getFullYear()} All Rights Reserved • Powered by Cenexa Systems

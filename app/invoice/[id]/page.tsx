@@ -121,9 +121,9 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
         <div className="bg-[#ffffff] border-b border-[#e5e5e5] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center relative">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#4EC3D7] via-[#4EC3D7] to-[#4EC3D7]" />
           <div className="w-24 h-24 flex items-center justify-center mb-3">
-            <img src="/logo.png" alt="Sweety Beauty Studio Logo" className="max-w-full max-h-full object-contain" />
+            <img src="/logo.png" alt="Sweety Beauty Studio and Spa Logo" className="max-w-full max-h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-black text-[#4EC3D7] tracking-tight">Sweety Beauty Studio</h1>
+          <h1 className="text-3xl font-black text-[#4EC3D7] tracking-tight">Sweety Beauty Studio and Spa</h1>
           <p className="text-xs text-[#4EC3D7] font-bold tracking-wider mt-1 mb-1">Proprietor: Sunitha Mercy</p>
           <p className="text-xs text-[#4EC3D7] font-bold tracking-wider mb-4">INVOICE: {order.id}</p>
           
